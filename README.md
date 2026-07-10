@@ -1,8 +1,26 @@
-# PayLedgerService – Event-Driven E-Wallet Microservices Platform
+# PayFlow – Event-Driven E-Wallet Microservices Platform
 
 PayFlow is a Java Spring Boot microservices application that simulates a digital wallet system. It handles user wallet top-ups, withdrawals, and peer-to-peer transfers, with asynchronous processing and email notifications powered by Apache Kafka.
 
 The project is split into four independently deployable services — **User**, **Wallet**, **Transaction**, and **Notification** — each with its own REST API and its own database, communicating with one another through Kafka events rather than direct synchronous calls.
+
+---
+
+## Why I Built This
+
+I built PayFlow to understand how production-style payment systems maintain data consistency and communicate across services **without** relying on distributed transactions or direct service-to-service calls. Specifically, I wanted hands-on experience with:
+
+- Designing a wallet/transaction domain where correctness (no lost or double-counted money) actually matters, and using `@Transactional` + rollback handling to enforce it at the DB layer.
+- Using Kafka as the backbone for inter-service communication instead of REST-to-REST calls, including topic design and isolated consumer groups so multiple services can react to the same event independently.
+- Keeping services decoupled enough that a service (e.g. Notification) can be down without blocking the core wallet/transfer flow.
+
+Working through this also surfaced real trade-offs — like the gap between "the client gets an immediate response" and "the client knows the final outcome" — which is covered below under Roadmap.
+
+---
+
+## Screenshots / Demo
+
+*(Add screenshots, a Postman collection export, or a short GIF here — e.g. a Postman request/response for `/wallet/transfer`, or the Kafka consumer logs showing an event being picked up.)*
 
 ---
 
@@ -125,10 +143,13 @@ internal-ewallet/
 ## Getting Started
 
 ### Prerequisites
-- Java 17+ (or the JDK version used in your `pom.xml`)
-- Maven
-- MySQL running locally, with a separate schema/database created for each service
-- Apache Kafka + Zookeeper running locally (started manually — no `docker-compose` included in this project)
+- Java `<!-- e.g. 17 -->` (check the `<java.version>` in `pom.xml`)
+- Spring Boot `<!-- e.g. 3.2.x -->` (check the parent version in `pom.xml`)
+- Maven `<!-- e.g. 3.9.x -->`
+- Apache Kafka `<!-- e.g. 3.6.x -->` + Zookeeper, running locally (started manually — no `docker-compose` included in this project)
+- MySQL `<!-- e.g. 8.0 -->`, with a separate schema/database created for each service
+
+> Fill in the exact versions above from your `pom.xml` before publishing — interviewers sometimes clone the repo and run it, so vague or missing versions cause avoidable setup friction.
 
 ### 1. Set up MySQL
 Create a database for each service and update the `application.properties` (or `.yml`) in each module with your local credentials:
@@ -161,6 +182,16 @@ curl -X POST http://localhost:<transaction-service-port>/wallet/transfer \
   -H "Content-Type: application/json" \
   -d '{"senderId":1,"receiverId":2,"amount":500.0,"description":"Payment for groceries"}'
 ```
+
+---
+
+## Testing
+
+Endpoints were tested manually using Postman, covering:
+- Successful top-up, withdrawal, and transfer flows end-to-end (request → `PENDING` response → Kafka event → DB status update → email notification).
+- Failure scenarios (e.g. insufficient wallet balance) to verify rollback handling and that the transaction correctly resolves to `FAILED` instead of leaving inconsistent state.
+
+*(Update this section if you've since added JUnit/Mockito unit tests or integration tests — mention specific classes/coverage if so, since automated tests are one of the first things interviewers ask about at this level.)*
 
 ---
 
