@@ -1,4 +1,4 @@
-# PayFlow – Event-Driven E-Wallet Microservices Platform
+# PayLegderService – Event-Driven E-Wallet Microservices Platform
 
 PayFlow is a Java Spring Boot microservices application that simulates a digital wallet system. It handles user wallet top-ups, withdrawals, and peer-to-peer transfers, with asynchronous processing and email notifications powered by Apache Kafka.
 
@@ -15,12 +15,6 @@ I built PayFlow to understand how production-style payment systems maintain data
 - Keeping services decoupled enough that a service (e.g. Notification) can be down without blocking the core wallet/transfer flow.
 
 Working through this also surfaced real trade-offs — like the gap between "the client gets an immediate response" and "the client knows the final outcome" — which is covered below under Roadmap.
-
----
-
-## Screenshots / Demo
-
-*(Add screenshots, a Postman collection export, or a short GIF here — e.g. a Postman request/response for `/wallet/transfer`, or the Kafka consumer logs showing an event being picked up.)*
 
 ---
 
